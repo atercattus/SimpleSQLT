@@ -1,7 +1,7 @@
 <?php
 namespace SimpleSQLT\Specifics;
 
-interface Specific
+interface ISpecific
 {
     /**
      * @param mixed $v
