@@ -1,9 +1,9 @@
 <?php
 namespace SimpleSQLT\Specifics;
 
-use SimpleSQLT\Specifics\Specific;
+use \SimpleSQLT\Specifics\ISpecific;
 
-class MySQL implements Specific
+class MySQL implements ISpecific
 {
     /**
      * {@inheritdoc}
@@ -24,6 +24,6 @@ class MySQL implements Specific
      */
     public function quoteID($id)
     {
-        return '`'.$id.'`';
+        return '`'.str_replace('`', '``', $id).'`';
     }
 }

@@ -22,6 +22,13 @@ class Templater
      */
     protected $_boundL = '{';
     protected $_boundR = '}';
+    protected $_boundCL = '[';
+    protected $_boundCR = ']';
+
+    /**
+     * @var string
+     */
+    protected $_via = '';
 
     /**
      * @var \SimpleSQLT\Specifics\Specific
@@ -54,11 +61,12 @@ class Templater
     protected $_internalPresent = '';
 
     /**
-     * @param string $via Тип БД, к которой будут выполняться запросы
+     * @param string $via       Тип БД, для которой подготавливаются запросы
+     * @param array $via_params Параметры для конструктора $via
      *
      * @throws \UnexpectedValueException При некорректном $via
      */
-    public function __construct($via)
+    public function __construct($via, $via_params=array())
     {
         try {
             $class = new \ReflectionClass('\\SimpleSQLT\\Specifics\\'.$via);
@@ -66,9 +74,20 @@ class Templater
         catch (\ReflectionException $e) {
             throw new \UnexpectedValueException(sprintf('Unexpected via [%s]', $via));
         }
-        $sqlspec = $class->newInstanceArgs();
+        $sqlspec = $class->newInstanceArgs($via_params);
 
+        $this->_via = $via;
         $this->_sqlspec = $sqlspec;
+    }
+
+    /**
+     * Возвращает тип БД, для которой подготавливаются запросы
+     *
+     * @return string
+     */
+    public function getVia()
+    {
+        return $this->_via;
     }
 
     /**
@@ -136,12 +155,16 @@ class Templater
         $this->_internalPresent = '';
         $sql = $this->_sql;
 
+        if (!strlen($sql)) {
+            return '';
+        }
+
         // заменитель в местах с необъявленной переменной
         $r = substr(uniqid(), -5);
         $this->_undefvar_ph = sprintf('_%s__UNDEFINED_VARIABLE__%s_', $r, $r);
 
         // есть ли в оригинальном шаблоне что-то похожее на условные блоки
-        $useCond = (false !== strpos($sql, $this->_boundL));
+        $useCond = (false !== strpos($sql, $this->_boundCL));
 
         try {
             // выполняю подстановки
@@ -164,7 +187,13 @@ class Templater
             $sql = $this->_checkForConditionalBlocks($sql);
         }
 
-        return $sql ?: false;
+        // если остались необъявленные/NULL значения - ругаюсь
+        if (false !== strpos($sql, $this->_undefvar_ph)) {
+            trigger_error('Undeclared or NULL variable out of conditional block', E_USER_WARNING);
+            $sql = '';
+        }
+
+        return strlen($sql) ? $sql : false;
     }
 
     /**
@@ -218,14 +247,14 @@ class Templater
             case 'integer':
                 $value = (int)$value;
                 if ($value<0) {
-                    $value = '('.$value.')'; // (-42)
+                    $value = '('.$value.')'; // (-100500)
                 }
                 return (string)$value;
 
             case 'float':
                 $value = (float)$value;
                 if ($value < 0.0) {
-                    $value = '('.$value.')'; // (-100.500)
+                    $value = '('.$value.')'; // (-4.2)
                 }
                 return (string)$value;
 
@@ -298,7 +327,10 @@ class Templater
      */
     protected function _parseSQL($sql)
     {
+        $er = error_reporting(0);
         $tokens = token_get_all('<?php '.$sql);
+        error_reporting($er);
+
         array_shift($tokens); // выкидываю мною добавленный T_OPEN_TAG
         $tokens = array_map(
             function($i) {
@@ -312,8 +344,8 @@ class Templater
 
     /**
      * Обработка условных блоков:
-     *  - для блоков, где все значения проставлены, просто выкидываю из результата границы { и }
-     * - для неполных блоков удаляю все их содержимое вместе с границами
+     *  - для блоков, где все значения проставлены, просто выкидываю из результата условные границы
+     *  - для неполных блоков удаляю все их содержимое вместе с границами
      *
      * Поддерживаются вложенные блоки
      *
@@ -329,10 +361,10 @@ class Templater
 
             for ($p = 0; $p<$cnt; ++$p) {
                 $cur = $tokens[$p];
-                if ($cur == $this->_boundL) {
+                if ($cur == $this->_boundCL) {
                     $opens[] = array('p'=>$p, 'u'=>false);
                 }
-                elseif ($cur == $this->_boundR) {
+                elseif ($cur == $this->_boundCR) {
                     $open = array_pop($opens);
                     if (null === $open) {
                         throw new UnmatchedBrackets();
@@ -345,8 +377,8 @@ class Templater
                         }
                     }
                     else { // удаление только границ
-                        $tokens[$from] = ''; // удаление {
-                        $tokens[$p]    = ''; // удаление }
+                        $tokens[$from] = ''; // удаление начальной границы
+                        $tokens[$p]    = ''; // удаление конечной границы
                     }
                 }
                 elseif ($cur == $this->_undefvar_ph) {
@@ -365,7 +397,7 @@ class Templater
             }
         }
         catch (UnmatchedBrackets $e) {
-            trigger_error(sprintf('Unmatched %s and %s', $this->_boundL, $this->_boundR), E_USER_WARNING);
+            trigger_error(sprintf('Unmatched %s and %s', $this->_boundCL, $this->_boundCR), E_USER_WARNING);
             $tokens = array();
         }
     }

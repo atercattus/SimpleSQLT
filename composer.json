@@ -1,0 +1,10 @@
+{
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
+    "config": {
+        "github-oauth": {
+            "github.com": "ed77fdd761bc5edce8164e5d0d4d08fd66d18b24"
+        }
+    }
+}
