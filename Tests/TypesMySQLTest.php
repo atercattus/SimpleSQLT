@@ -20,7 +20,7 @@ class TypesMySQLTest extends TypesTestParent
             array(':id',    'a',    '`a`'),
             array(':id',    'a`b',  '`a``b`'),
             // escaping
-            array('', "a'b\"c\\d\\ne\\rf\\x00\\x1A", "\"a\\'b\\\"c\\\\d\\\\ne\\\\rf\\\\x00\\\\x1A\""),
+            array('', "a'b\"c d\ne\rf\x00\x1A", "\"a\\'b\\\"c d\\ne\\rf\\x00\\x1A\""),
         );
     }
 }
