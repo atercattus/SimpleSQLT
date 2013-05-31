@@ -31,7 +31,7 @@ class Templater
     protected $_via = '';
 
     /**
-     * @var \SimpleSQLT\Specifics\Specific
+     * @var \SimpleSQLT\Specifics\ISpecific
      */
     protected $_sqlspec;
 
