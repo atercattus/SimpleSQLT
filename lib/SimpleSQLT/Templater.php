@@ -155,6 +155,10 @@ class Templater
         $this->_internalPresent = '';
         $sql = $this->_sql;
 
+        if (!strlen($sql)) {
+            return '';
+        }
+
         // заменитель в местах с необъявленной переменной
         $r = substr(uniqid(), -5);
         $this->_undefvar_ph = sprintf('_%s__UNDEFINED_VARIABLE__%s_', $r, $r);

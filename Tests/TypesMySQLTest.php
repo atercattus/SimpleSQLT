@@ -13,7 +13,7 @@ class TypesMySQLTest extends TypesTestParent
         return new SQLT(SQLT::VIA_MYSQL);
     }
 
-    public function provider()
+    public function providerTypes()
     {
         return array(
             // id

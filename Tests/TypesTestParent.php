@@ -19,7 +19,7 @@ class TypesTestParent extends PHPUnit_Framework_TestCase
 
     /**
      * @depends testSetupSQLT
-     * @dataProvider provider
+     * @dataProvider providerTypes
      */
     public function testTypes($type, $val, $expect, $sqlt)
     {
@@ -29,7 +29,7 @@ class TypesTestParent extends PHPUnit_Framework_TestCase
         $this->assertTrue($out === $expect, sprintf('"%s" !== "%s"', $out, $expect));
     }
 
-    public function provider()
+    public function providerTypes()
     {
         return array();
     }
