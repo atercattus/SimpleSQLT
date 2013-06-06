@@ -109,14 +109,14 @@ where [...] - an optional part.
             <li><b>id</b> - DB field name;</li>
             <li><b>raw</b> - raw data is added to the query as is;</li>
             <li><b>array</b> - array of values of the type specified in the <i>subtype</i>. values ​​are separated by commas;</li>
-            <li><b>hash</b> - dictionary [<b>id</b> => <b>subtype</b>, ...]. keys are always type <b>id</b>, values of type <i>subtype</i>.</li>
+            <li><b>hash</b> - dictionary [<b>id</b> => <i>subtype</i>, ...]. keys are always type <b>id</b>, values of type <i>subtype</i>.</li>
         </ul>
     </li>
     <li><i>subtype</i> - data type of elements of array/hash in a placeholder.</li>
 </ul>
 For example:
 
-    - {v} is equivalent to {v:str} и {v:string};
+    - {v} is equivalent to {v:str} and {v:string};
     - {v:array} is equivalent to "{v0:str}, {v1:str}, ...";
     - {v:array:int} is equivalent to "{v0:int}, {v1:int}, ...";
     - {v:hash} is equivalent to "{v0k:id} = {v0v:str}, {v1k:id} = {v1v:str}, ...";
